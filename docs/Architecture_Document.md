@@ -43,9 +43,7 @@ The baseline RAG pipeline performs a straightforward retrieval-and-generate oper
 2. ChromaDB returns the top-k (typically 1 for baseline) candidate passages.
 3. The retrieved passage is merged with the user query and input to Llama 3.1 1B for generation.
 
-Multiple prompting styles were compared, with persona prompting (where the model assumes an informed domain expert persona) yielding the highest F1 and exact match scores.
-
-Error-handling routines and detailed retrieval logs track inference times, passage IDs, and token usage for transparency and debugging.
+Multiple prompting styles were compared, with persona prompting (where the model assumes an informed domain expert persona) yielding the highest F1 (~8) and 0 match scores (due to the model answering).
 
 ***
 
@@ -63,13 +61,9 @@ Configuration files (e.g., `config.yaml`) allow runtime adjustments of chunk siz
 ***
 
 ### 6. Evaluation Workflow and Metrics  
-ARES is used for evaluation, measuring faithfulness, context precision, recall, and answer helpfulness across three test conditions:
+ARES is used for evaluation, measuring faithfulness, context precision, recall, and answer helpfulness for given Enhanced RAG (optimized + reranked) architecture
 
-- Naive RAG (top‑1)
-- Naive RAG (top‑5)
-- Enhanced RAG (optimized + reranked)
-
-Over 100 diverse test queries, metrics are aggregated and logged for statistical robustness. The enhanced system demonstrated clear gains in faithfulness and context recall, supporting the efficacy of fine-tuned passage selection and reranking.
+Over 180 diverse test queries, metrics are aggregated and logged for statistical robustness. The enhanced system demonstrated clear gains in faithfulness and context recall, supporting the efficacy of fine-tuned passage selection and reranking.
 
 ***
 
