@@ -19,7 +19,7 @@ NLX_Assignment2/
 │   ├── Enhanced_RAG_implementation.md
 │   ├── Evaluation Results.pdf
 │   ├── Evaluation_Results.md                  ## Can also be considered the comparison_results as no ipynb or csv results for the same
-│   ├── Naive_RAG_implementation.md
+│   ├── Naive_RAG_implementation.md            ## Contains different prompting strategies
 │   └── Technical Report.pdf                   ## Contains brief Appendix
 ├── notebooks(src)/                             
 │   ├── Advanced_RAG_Final.ipynb
