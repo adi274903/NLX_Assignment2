@@ -80,7 +80,7 @@ Preliminary insights demonstrated measurable gains in faithfulness and context r
 **Chunk Length Justification:** The 512‑token setting was preferred for its superior answer coherence and minimal context fragmentation under multi‑paragraph queries. Combined with top‑k = 5, it yielded balanced recall and manageable prompt length.
 
 **Scalability and Production Readiness:**  
-- Modular file organization (`src/naive_rag.py`, `src/enhanced_rag.py`, `evaluation.py`) ensures ease of extension toward other evaluation frameworks such as RAGAs.  
+- Modular file organization (`src/naive_rag.ipynb`, `src/enhanced_rag.ipynb`, `src/evaluation.ipynb`,`src/data_exploration.ipynb`) ensures ease of extension toward other evaluation frameworks such as RAGAs.  
 - Fallback mechanisms allow the system to switch between FAISS and Milvus without major reimplementation.
 - Configuration‑driven design supports scaling to cloud deployment or integration with orchestration tools.
 
