@@ -1,0 +1,8 @@
+chromadb
+huggingface_hub
+transformers
+torch
+sentence-transformers
+evaluate
+openai
+ragas
