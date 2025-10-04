@@ -61,7 +61,7 @@ Configuration files (e.g., `config.yaml`) allow runtime adjustments of chunk siz
 ***
 
 ### 6. Evaluation Workflow and Metrics  
-ARES is used for evaluation, measuring faithfulness, context precision, recall, and answer helpfulness for given Enhanced RAG (optimized + reranked) architecture
+ARES is used for evaluation, measuring faithfulness, context precision, recall, and answer helpfulness for given Naive and Enhanced RAG (optimized + reranked) architecture. Chunk size is 512 and topk is 5.
 
 Over 180 diverse test queries, metrics are aggregated and logged for statistical robustness. The enhanced system demonstrated clear gains in faithfulness and context recall, supporting the efficacy of fine-tuned passage selection and reranking.
 
