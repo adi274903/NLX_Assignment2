@@ -88,4 +88,3 @@ The codebase is organized into modular, well-documented functions and notebooks 
 
 This advanced RAG pipeline demonstrates scalable, state-of-the-art retrieval, context handling, and semantic reranking, providing high-quality outputs that are rigorously evaluated and documented. The interplay between context window optimization and cross-encoder reranking places the system at the cutting edge of evidence-based QA, offering a reproducible and extensible foundation for ongoing research and practical deployment.
 
-[1](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/32324208/6914c93f-abac-4d20-b1df-fd46db4ab912/Advanced_RAG_Final.ipynb)
