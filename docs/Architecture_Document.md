@@ -9,7 +9,7 @@
 ***
 
 ### 1. System Overview  
-The Retrieval‑Augmented Generation (RAG) system developed for this assignment is structured into modular components for reproducibility and scalability. The architecture integrates a lightweight open‑weight embedding generator (Gemma 300M) with a compact generation model (Llama 3.1 1B). The pipeline bridges document retrieval, context construction, and generation to produce responses grounded in external knowledge. The goal is to contrast a naïve RAG pipeline against an enhanced version equipped with advanced retrieval and ranking features.
+The Retrieval‑Augmented Generation (RAG) system developed for this assignment is structured into modular components for reproducibility and scalability. The architecture integrates a lightweight open‑weight embedding generator (Gemma 300M) with a compact generation model (Llama 3.1 1B). The pipeline bridges document retrieval, context construction, and generation to produce responses grounded in external knowledge. The goal is to contrast a naive RAG pipeline against an enhanced version equipped with advanced retrieval and ranking features.
 
 The overall workflow follows four sequential modules:
 
@@ -37,14 +37,14 @@ The embedding vectors are indexed using **FAISS**, chosen for its efficient appr
 ***
 
 ### 4. Naive RAG Implementation  
-The baseline (naïve) RAG pipeline integrates the embedding index with the **Llama 3.1 1B** inference model through a simple retrieval‑and‑generate loop. For each query:  
+The baseline (naive) RAG pipeline integrates the embedding index with the **Llama 3.1 1B** inference model through a simple retrieval‑and‑generate loop. For each query:  
 1. The query is converted into an embedding using Gemma 300M.  
 2. The top‑k (= 1) document vectors are retrieved from FAISS.  
 3. The full retrieved text is concatenated with the query and passed to Llama 3.1 1B for response generation.
 
 Error handling ensures fallback retrieval if the index search returns empty results. Logging captures query latency, document IDs retrieved, and token utilization.  
 
-This naïve configuration served as the foundation for evaluation using multiple prompting styles: chain‑of‑thought, instruction, and persona prompting. Among these, **persona prompting**—which prompts the model to assume an informed “domain expert” persona—produced the highest F1 and Exact Match scores, emphasizing the importance of context framing for smaller LLMs.
+This naive configuration served as the foundation for evaluation using multiple prompting styles: chain‑of‑thought, instruction, and persona prompting. Among these, **persona prompting**—which prompts the model to assume an informed “domain expert” persona—produced the highest F1 and Exact Match scores, emphasizing the importance of context framing for smaller LLMs.
 
 ***
 
@@ -57,15 +57,15 @@ After establishing the baseline, two advanced features were added to improve con
 2. **Reranking with MiniLM**  
    A reranking model (based on MiniLM) is employed as a second‑stage filter. After initial retrieval (top‑5 from FAISS), each candidate document is reranked by semantic relevance using a MiniLM‑based cross‑encoder. The top‑3 passages are re‑ordered and merged according to descending relevance probability. This approach improved retrieval precision and contextual grounding without substantially increasing computational cost.
 
-The enhanced pipeline retains the same overall structure but substitutes the naïve retrieval mechanism with a two‑stage retrieval and window optimization. Configuration files under `config.yaml` allow adjustable parameters (chunk size, top‑k, and reranker thresholds) to sustain reproducibility.
+The enhanced pipeline retains the same overall structure but substitutes the naive retrieval mechanism with a two‑stage retrieval and window optimization. Configuration files under `config.yaml` allow adjustable parameters (chunk size, top‑k, and reranker thresholds) to sustain reproducibility.
 
 ***
 
 ### 6. Evaluation Workflow and Metrics  
 Evaluation is executed through the **ARES** framework, providing automated metrics such as *faithfulness*, *context precision*, *context recall*, and *answer helpfulness*. The comparison uses three evaluation cohorts:
 
-- Naïve RAG (top‑1)
-- Naïve RAG (top‑5)
+- Naive RAG (top‑1)
+- Naive RAG (top‑5)
 - Enhanced RAG (reranked + optimized)
 
 ARES runs over 100 test queries drawn from multiple domains within the Mini Wikipedia dataset. Output metrics are aggregated into CSV logs for further analysis.  
@@ -89,4 +89,4 @@ Preliminary insights demonstrated measurable gains in faithfulness and context r
 ***
 
 ### 8. Conclusion  
-The architecture successfully transitions from a naïve retrieval‑generate setup to an enhanced, production‑ready RAG pipeline emphasizing efficient retrieval refinement and context management. The combination of Llama 3.1 1B, Gemma 300M, and MiniLM strikes an effective balance between performance and computational cost. Empirical findings validate that persona prompting and 512‑token chunks with top‑k = 5 retrieval deliver optimal results for this deployment scale. With automated evaluation through ARES, the system aligns with real‑world development practices for evidence‑based model improvement and reproducible experimentation.
+The architecture successfully transitions from a naive retrieval‑generate setup to an enhanced, production‑ready RAG pipeline emphasizing efficient retrieval refinement and context management. The combination of Llama 3.1 1B, Gemma 300M, and MiniLM strikes an effective balance between performance and computational cost. Empirical findings validate that persona prompting and 512‑token chunks with top‑k = 5 retrieval deliver optimal results for this deployment scale. With automated evaluation through ARES, the system aligns with real‑world development practices for evidence‑based model improvement and reproducible experimentation.
