@@ -1,0 +1,8 @@
+{
+  "chunk_length": 512,
+  "top_k": 5,
+  "embed_model": "google/embeddinggemma-300m",
+  "llm_model": "meta-llama/Llama-3.1-8B-Instruct",
+
+  "batch_size" : 32
+}
