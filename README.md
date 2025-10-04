@@ -7,11 +7,11 @@ The following repository is for the CMU course Applications of NLX and LLM. It i
 NLX_Assignment2/
 ├── data/
 │   ├── evaluation/
-│   │   ├── ERAG_persona_results_181.csv         ## Evaluation Data of Enhanced RAG
-│   │   ├── NRAG_persona_results_181.csv         ## Naive RAG evaluation data
+│   │   ├── ERAG_persona_results_181.csv       ## Evaluation Data of Enhanced RAG
+│   │   ├── NRAG_persona_results_181.csv       ## Naive RAG evaluation data
 │   │   └── evaluation_readme.md
 │   ├── processed/
-│   │   ├── dataset.md                          ## Null markdown
+│   │   ├── dataset.md                         ## Null markdown
 │   │   ├── test.csv
 │   │   └── train.csv
 ├── docs/
@@ -20,8 +20,8 @@ NLX_Assignment2/
 │   ├── Evaluation Results.pdf
 │   ├── Evaluation_Results.md                  ## Can also be considered the comparison_results as no ipynb or csv results for the same
 │   ├── Naive_RAG_implementation.md
-│   └── Technical Report.pdf
-├── notebooks/                                ## It is also the src as all code was in notebook
+│   └── Technical Report.pdf                   ## Contains brief Appendix
+├── notebooks/                                 ## It is also the src as all code was in notebook
 │   ├── Advanced_RAG_Final.ipynb
 │   ├── Evaluation.ipynb
 │   ├── Naive_RAG.ipynb
