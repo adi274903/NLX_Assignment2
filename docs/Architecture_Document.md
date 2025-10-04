@@ -1,92 +1,88 @@
+***
 
 ### Architecture Document  
 **Assignment 2: Ground the Domain – From Naive RAG to Production Patterns**  
 **Dataset:** RAG Mini Wikipedia  
 **Models Used:** Llama 3.1 1B (LLM), Gemma 300M (embedding)  
+**Vector Store:** ChromaDB (Google Drive mounted)  
 **Enhancements:** Context window optimization + Reranking  
 **Evaluation Framework:** ARES  
 
 ***
 
 ### 1. System Overview  
-The Retrieval‑Augmented Generation (RAG) system developed for this assignment is structured into modular components for reproducibility and scalability. The architecture integrates a lightweight open‑weight embedding generator (Gemma 300M) with a compact generation model (Llama 3.1 1B). The pipeline bridges document retrieval, context construction, and generation to produce responses grounded in external knowledge. The goal is to contrast a naive RAG pipeline against an enhanced version equipped with advanced retrieval and ranking features.
+The Retrieval‑Augmented Generation (RAG) system developed for this assignment is structured into modular components prioritizing reproducibility, scalability, and ease of experimentation. The core design integrates Gemma 300M embeddings with a lightweight Llama 3.1 1B generation model. The pipeline is engineered to support both a naive baseline RAG (standard retrieval and generation) and an enhanced production-ready RAG with improved passage selection and reranking features.
 
-The overall workflow follows four sequential modules:
+The workflow comprises four primary modules:
 
 1. **Document Processing and Embedding Generation**  
-2. **Retrieval and Candidate Context Construction**  
+2. **Vector Indexing and Retrieval with ChromaDB**  
 3. **Response Generation via Persona Prompting**  
-4. **Output Evaluation with ARES**
+4. **Automated Evaluation with ARES**
 
-This structure promotes modular experimentation, enabling systematic tuning of parameters and the addition of production‑grade enhancements without redesigning the underlying codebase.
+Each module is independently configurable, supporting extensible parameter sweeps and easy deployment adjustments aligned with research and production needs.
 
 ***
 
 ### 2. Data Pipeline and Preprocessing  
-The input corpus originates from the *RAG Mini Wikipedia* dataset, consisting of semantically diverse text segments suitable for small‑scale experimentation. Each entry contains a title, passage, and metadata. Prior to embedding, documents are tokenized, normalized, and segmented into variable chunk sizes: 256, 384, and 512 tokens.  
-
-Empirical exploration during Step 4 showed that chunk size directly influenced retrieval relevance and generation quality. Shorter segments (256) increased granularity but fragmented context, occasionally missing semantic continuity. Medium‑length (384) balanced coverage and density, whereas 512‑token chunks consistently yielded the most coherent and contextually grounded answers during evaluation—especially when combined with *top‑k = 5* retrieval. Thus, 512 was selected as the final chunk setting for the production configuration.
+The system ingests the *RAG Mini Wikipedia* dataset, converting each entry into normalized passages with metadata. Documents are segmented into variable chunk sizes (256, 384, and 512 tokens) to empirically test effects on retrieval performance and context coverage. Initial experimentation revealed that while smaller chunks increase retrieval granularity, they may omit essential context for answer generation. Conversely, the 512-token configuration, paired with top‑k = 5 passage retrieval, offered consistently coherent and context-rich answers with minimal fragmentation. This configuration became the production default.
 
 ***
 
 ### 3. Embedding and Vector Index  
-All text chunks are embedded using **Gemma 300M**, a compact transformer optimized for semantically dense sentence embeddings. The model encodes each chunk into a 300‑dimensional vector representation. Dimensionality trade‑offs were analyzed to ensure computational economy on CPU/GPU‑free environments while preserving semantic fidelity.
+After preprocessing, each passage is embedded using **Gemma 300M**, outputting 300-dimensional vectors. Vectors, along with passage metadata (ID, title, token count), are stored in **ChromaDB**. Using ChromaDB (mounted through Google Drive) offers strong compatibility with Python, persistent cloud-backed storage, and flexible search schemas suitable for iterative experimentation.
 
-The embedding vectors are indexed using **FAISS**, chosen for its efficient approximate nearest‑neighbor (ANN) search and Python compatibility. The index is built using L2 distance metrics with flat indexing for reproducibility. Each embedding is associated with metadata (document ID, section title, token length) stored in JSON format. This configuration allows filtering or reranking by additional attributes in later stages.
+ChromaDB is configured for efficient similarity search via cosine distance. Metadata enables rapid filtering and advanced reranking in later steps. This setup facilitates the reproducibility and transportability of the index across diverse compute environments, especially within Google Colab or similar platforms that connect to Google Drive for persistent storage.
 
 ***
 
 ### 4. Naive RAG Implementation  
-The baseline (naive) RAG pipeline integrates the embedding index with the **Llama 3.1 1B** inference model through a simple retrieval‑and‑generate loop. For each query:  
-1. The query is converted into an embedding using Gemma 300M.  
-2. The top‑k (= 1) document vectors are retrieved from FAISS.  
-3. The full retrieved text is concatenated with the query and passed to Llama 3.1 1B for response generation.
+The baseline RAG pipeline performs a straightforward retrieval-and-generate operation:
 
-Error handling ensures fallback retrieval if the index search returns empty results. Logging captures query latency, document IDs retrieved, and token utilization.  
+1. The query is embedded via Gemma 300M.
+2. ChromaDB returns the top-k (typically 1 for baseline) candidate passages.
+3. The retrieved passage is merged with the user query and input to Llama 3.1 1B for generation.
 
-This naive configuration served as the foundation for evaluation using multiple prompting styles: chain‑of‑thought, instruction, and persona prompting. Among these, **persona prompting**—which prompts the model to assume an informed “domain expert” persona—produced the highest F1 and Exact Match scores, emphasizing the importance of context framing for smaller LLMs.
+Multiple prompting styles were compared, with persona prompting (where the model assumes an informed domain expert persona) yielding the highest F1 and exact match scores.
+
+Error-handling routines and detailed retrieval logs track inference times, passage IDs, and token usage for transparency and debugging.
 
 ***
 
 ### 5. Enhanced RAG Implementation  
-After establishing the baseline, two advanced features were added to improve contextual precision and reduce hallucination:
+To move beyond the naive pipeline, two advanced enhancements were developed:
 
 1. **Context Window Optimization**  
-   Rather than feeding all retrieved passages verbatim, an adaptive windowing technique selectively trims irrelevant or redundant segments before model input. Each candidate passage is scored for query‑term density and semantic overlap using cosine similarity. Only the top sections that fit the available Llama 3.1 1B context length are concatenated. This reduces prompt dilution, improving faithfulness and factual coherence.
+   Passages are scored and trimmed through a custom windowing scheme, using cosine similarity and query density to retain only the most relevant segments, constrained to Llama 3.1 1B’s context window. This improves faithfulness by excluding extraneous or semantically diluted material from prompts.
 
 2. **Reranking with MiniLM**  
-   A reranking model (based on MiniLM) is employed as a second‑stage filter. After initial retrieval (top‑5 from FAISS), each candidate document is reranked by semantic relevance using a MiniLM‑based cross‑encoder. The top‑3 passages are re‑ordered and merged according to descending relevance probability. This approach improved retrieval precision and contextual grounding without substantially increasing computational cost.
+   Following initial retrieval (top‑5) from ChromaDB, passages are reranked using a MiniLM-based cross-encoder for fine-grained semantic matching. The most relevant top-3 passages are selected for aggregation in the input to the LLM. This two-stage retrieval process raises overall retrieval precision and reduces hallucinations.
 
-The enhanced pipeline retains the same overall structure but substitutes the naive retrieval mechanism with a two‑stage retrieval and window optimization. Configuration files under `config.yaml` allow adjustable parameters (chunk size, top‑k, and reranker thresholds) to sustain reproducibility.
+Configuration files (e.g., `config.yaml`) allow runtime adjustments of chunk size, top‑k, and reranking thresholds to support repeatable, parameterized experimentation.
 
 ***
 
 ### 6. Evaluation Workflow and Metrics  
-Evaluation is executed through the **ARES** framework, providing automated metrics such as *faithfulness*, *context precision*, *context recall*, and *answer helpfulness*. The comparison uses three evaluation cohorts:
+ARES is used for evaluation, measuring faithfulness, context precision, recall, and answer helpfulness across three test conditions:
 
-- Naive RAG (top‑1)
-- Naive RAG (top‑5)
-- Enhanced RAG (reranked + optimized)
+- Naive RAG (top‑1)
+- Naive RAG (top‑5)
+- Enhanced RAG (optimized + reranked)
 
-ARES runs over 100 test queries drawn from multiple domains within the Mini Wikipedia dataset. Output metrics are aggregated into CSV logs for further analysis.  
-
-Preliminary insights demonstrated measurable gains in faithfulness and context recall in the enhanced setup, consistent with the design hypothesis that refined context selection and reranking improve factual grounding. Context precision increased particularly for subjective or multi‑entity questions, where the baseline often produced hallucinated or incomplete responses.
+Over 100 diverse test queries, metrics are aggregated and logged for statistical robustness. The enhanced system demonstrated clear gains in faithfulness and context recall, supporting the efficacy of fine-tuned passage selection and reranking.
 
 ***
 
 ### 7. System Design Principles and Justifications  
-**Model Selection:** Llama 3.1 1B was chosen for its efficiency and interpretability on limited GPU/Colab environments. The small embedding model Gemma 300M complements this choice by offering fast inference and sufficient representational power for similarity search.
+**Model and Vector Store Selection:** Llama 3.1 1B and Gemma 300M provide a balance of cost, speed, and generative quality suitable for resource-constrained and portable deployments. ChromaDB mounted through Google Drive enables persistent, cloud-synced storage and rapid vector operations within Colab and local workflows.
 
-**Chunk Length Justification:** The 512‑token setting was preferred for its superior answer coherence and minimal context fragmentation under multi‑paragraph queries. Combined with top‑k = 5, it yielded balanced recall and manageable prompt length.
+**Chunk Size Rationale:** 512-token chunks with top‑k = 5 maximized recall and answer coherency, balancing retrieval volume with manageable input length.
 
-**Scalability and Production Readiness:**  
-- Modular file organization (`src/naive_rag.ipynb`, `src/enhanced_rag.ipynb`, `src/evaluation.ipynb`,`src/data_exploration.ipynb`) ensures ease of extension toward other evaluation frameworks such as RAGAs.  
-- Fallback mechanisms allow the system to switch between FAISS and Milvus without major reimplementation.
-- Configuration‑driven design supports scaling to cloud deployment or integration with orchestration tools.
+**Reproducibility and Modularity:** Jupyter notebooks and modular source files (`src/naive_rag.ipynb`, `src/enhanced_rag.ipynb`, `src/evaluation.ipynb`, `src/data_exploration.ipynb`) facilitate progressive experimentation and expansion to frameworks like RAGAs. Flexible configuration and fallback design (ChromaDB/FAISS/Milvus) support rapid deployment or platform changes.
 
-**Logging and Error Management:** All major components include structured logging for retrieved items, inference time per query, and API response codes, enabling transparent debugging and performance analysis.
+**Logging and Error Management:** Comprehensive logging and fallback support ensure transparency and simplify post-hoc debugging and performance analysis.
 
 ***
 
 ### 8. Conclusion  
-The architecture successfully transitions from a naive retrieval‑generate setup to an enhanced, production‑ready RAG pipeline emphasizing efficient retrieval refinement and context management. The combination of Llama 3.1 1B, Gemma 300M, and MiniLM strikes an effective balance between performance and computational cost. Empirical findings validate that persona prompting and 512‑token chunks with top‑k = 5 retrieval deliver optimal results for this deployment scale. With automated evaluation through ARES, the system aligns with real‑world development practices for evidence‑based model improvement and reproducible experimentation.
+This architecture offers a robust, modern retrieval-augmented pipeline tailored for small-to-medium datasets and limited compute. Using persistent ChromaDB storage, together with Llama 3.1 1B and MiniLM for reranking, the system supports practical, repeatable research and production extension. Experiments with persona prompting and 512-token top‑k = 5 retrieval validate that context-aware passage selection is key to real-world RAG quality. Automated, evidence-driven evaluation via ARES affirms the deployment readiness and scientific rigor of this system.
