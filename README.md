@@ -21,7 +21,7 @@ NLX_Assignment2/
 │   ├── Evaluation_Results.md                  ## Can also be considered the comparison_results as no ipynb or csv results for the same
 │   ├── Naive_RAG_implementation.md
 │   └── Technical Report.pdf                   ## Contains brief Appendix
-├── notebooks/                                 ## It is also the src as all code was in notebook
+├── notebooks/src/                             
 │   ├── Advanced_RAG_Final.ipynb
 │   ├── Evaluation.ipynb
 │   ├── Naive_RAG.ipynb
